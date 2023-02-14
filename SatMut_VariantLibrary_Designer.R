@@ -1,6 +1,5 @@
-library(tidyverse)
-library(stringdist)
-
+# Designer:
+# https://github.com/broadinstitute/SatMut_VariantLibrary_Designer/releases/tag/v1.9 
 
 ##some common enzymes
 bamh1<-'GGATCC-BamHI' 
@@ -13,41 +12,98 @@ xba1<-'TCTAGA-XbaI'
 spe1<-'ACTAGT-SpeI'
 ecor5<-'GATATC-EcoRV' 
 
+########## FUNCTION: 'installPackage' ##########
+# This 'installPackage' function is for checking if a given package has
+# been installed and, if not, installing it.
 
-#################### set up the designer, then run it ########## 
-##Below you need to populate 6 variables. Then ready to run the designer.
+installPackage <- function(x){
+    x<-as.character(x)
+    if(x %in% as.vector(as.character(rownames(installed.packages())))==FALSE) {
+      if(x %in% as.vector(as.character(rownames(available.packages())))==FALSE) {
+      paste0(x," is not a valid package and cannot be installed - please check again...")
+    } else {
+      install.packages(x)           
+      }
+    
+    } else {
+      paste0(x," package already installed...")
+    }
+  }
+
+########## The end of FUNCTION: 'installPackage' ##########
+
+installPackage("tidyverse")
+installPackage("stringdist")
+
+library(tidyverse)
+library(stringdist)
+
+####################################################################
+#                                                                  #
+#      THIS DESIGNER NEEDS 'tidyverse' and 'stringdist' PACKAGES   #
+#      ON YOUR MACHINE. MAKE SURE YOU HAVE MANUALLY INSTALLED      #
+#      THEM OR THE ABOVE CODES CAN DO SO                           #
+#                                                                  #
+####################################################################
+
+
+#################### set up the designer, then run it ################### 
+## Below you need to populate 6 variables. Then ready to run the designer.
 
 # 1. templateSeq
 # 2. cloningSitesToEx
 # 3. gene
 # 4. codonRedunt
 # 5. cdnPosToChange
-# 6. folder 
+# 6. folder_to_write
+###################
 
-#templateSeqSCN2A 
-#format Left_flank[orf]right_flank, make sure the ORF sequence is marked by the brackets [ ]
+# 1. templateSeq
+# From the library expression clone configuration, in format of 
+# Left_flank[start..ORF..stop]right_flank. Make sure the ORF 
+# sequence is marked by the brackets [ ], and the 2 flanks are 
+# at least 6 bases each.
 
 templateSeq=as.character("TTCAGGTGTCGTGAGGCTAGCCATATGCCACC[ATGGCACAGTCAGTGCTGGTACCGCCAGGACCTGACAGCTTCCGCTTCTTTACCAGGGAATCCCTTGCTGCTATTGAACAACGCATTGCAGAAGAGAAAGCTAAGAGACCCAAACAGGAACGCAAGGATGAGGATGATGAAAATGGCCCAAAGCCAAACAGTGACTTGGAAGCAGGAAAATCTCTTCCATTTATTTATGGAGACATTCCTCCAGAGATGGTGTCAGTGCCCCTGGAGGATCTGGACCCCTACTATATCAATAAGAAAACGTTTATAGTATTGAATAAAGGGAAAGCAATCTCTCGATTCAGTGCCACCCCTGCCCTTTACATTTTAACTCCCTTCAACCCTATTAGAAAATTAGCTATTAAGATTTTGGTACATTCTTTATTCAATATGCTCATTATGTGCACGATTCTTACCAACTGTGTATTTATGACCATGAGTAACCCTCCAGACTGGACAAAGAATGTGGAGTATACCTTTACAGGAATTTATACTTTTGAATCACTTATTAAAATACTTGCAAGGGGCTTTTGTTTAGAAGATTTCACATTTTTACGGGATCCATGGAATTGGTTGGATTTCACAGTCATTACTTTTGCATATGTGACAGAGTTTGTGGACCTGGGCAATGTCTCAGCGTTGAGAACATTCAGAGTTCTCCGAGCATTGAAAACAATTTCAGTCATTCCAGGCCTGAAGACCATTGTGGGGGCCCTGATCCAGTCAGTGAAGAAGCTTTCTGATGTCATGATCTTGACTGTGTTCTGTCTAAGCGTGTTTGCGCTAATAGGATTGCAGTTGTTCATGGGCAACCTACGAAATAAATGTTTGCAATGGCCTCCAGATAATTCTTCCTTTGAAATAAATATCACTTCCTTCTTTAACAATTCATTGGATGGGAATGGTACTACTTTCAATAGGACAGTGAGCATATTTAACTGGGATGAATATATTGAGGATAAAAGTCACTTTTATTTTTTAGAGGGGCAAAATGATGCTCTGCTTTGTGGCAACAGCTCAGATGCAGGCCAGTGTCCTGAAGGATACATCTGTGTGAAGGCTGGTAGAAACCCCAACTATGGCTACACGAGCTTTGACACCTTTAGTTGGGCCTTTTTGTCCTTATTTCGTCTCATGACTCAAGACTTCTGGGAAAACCTTTATCAACTGACACTACGTGCTGCTGGGAAAACGTACATGATATTTTTTGTGCTGGTCATTTTCTTGGGCTCATTCTATCTAATAAATTTGATCTTGGCTGTGGTGGCCATGGCCTATGAGGAACAGAATCAGGCCACATTGGAAGAGGCTGAACAGAAGGAAGCTGAATTTCAGCAGATGCTCGAACAGTTGAAAAAGCAACAAGAAGAAGCTCAGGCGGCAGCTGCAGCCGCATCTGCTGAATCAAGAGACTTCAGTGGTGCTGGTGGGATAGGAGTTTTTTCAGAGAGTTCTTCAGTAGCATCTAAGTTGAGCTCCAAAAGTGAAAAAGAGCTGAAAAACAGAAGAAAGAAAAAGAAACAGAAAGAACAGTCTGGAGAAGAAGAGAAAAATGACAGAGTCCGAAAATCGGAATCTGAAGACAGCATAAGAAGAAAAGGTTTCCGTTTTTCCTTGGAAGGAAGTAGGCTGACATATGAAAAGAGATTTTCTTCTCCACACCAGTCCTTACTGAGCATCCGTGGCTCCCTTTTCTCTCCAAGACGCAACAGTAGGGCGAGCCTTTTCAGCTTCAGAGGTCGAGCAAAGGACATTGGCTCTGAGAATGACTTTGCTGATGATGAGCACAGCACCTTTGAGGACAATGACAGCCGAAGAGACTCTCTGTTCGTGCCGCACAGACATGGAGAACGGCGCCACAGCAATGTCAGCCAGGCCAGCCGTGCCTCCAGGGTGCTCCCCATCCTGCCCATGAATGGGAAGATGCATAGCGCTGTGGACTGCAATGGTGTGGTCTCCCTGGTCGGGGGCCCTTCTACCCTCACATCTGCTGGGCAGCTCCTACCAGAGGGCACAACTACTGAAACAGAAATAAGAAAGAGACGGTCCAGTTCTTATCATGTTTCCATGGATTTATTGGAAGATCCTACATCAAGGCAAAGAGCAATGAGTATAGCCAGTATTTTGACCAACACCATGGAAGAACTTGAAGAATCCAGACAGAAATGCCCACCATGCTGGTATAAATTTGCTAATATGTGTTTGATTTGGGACTGTTGTAAACCATGGTTAAAGGTGAAACACCTTGTCAACCTGGTTGTAATGGACCCATTTGTTGACCTGGCCATCACCATCTGCATTGTCTTAAATACACTCTTCATGGCTATGGAGCACTATCCCATGACGGAGCAGTTCAGCAGTGTACTGTCTGTTGGAAACCTGGTCTTCACAGGGATCTTCACAGCAGAAATGTTTCTCAAGATAATTGCCATGGATCCATATTATTACTTTCAAGAAGGCTGGAATATTTTTGATGGTTTTATTGTGAGCCTTAGTTTAATGGAACTTGGTTTGGCAAATGTGGAAGGATTGTCAGTTCTCCGATCATTCCGGCTGCTCCGAGTTTTCAAGTTGGCAAAATCTTGGCCAACTCTAAATATGCTAATTAAGATCATTGGCAATTCTGTGGGGGCTCTAGGAAACCTCACCTTGGTATTGGCCATCATCGTCTTCATTTTTGCTGTGGTCGGCATGCAGCTCTTTGGTAAGAGCTACAAAGAATGTGTCTGCAAGATTTCCAATGATTGTGAACTCCCACGCTGGCACATGCATGACTTTTTCCACTCCTTCCTGATCGTGTTCCGCGTGCTGTGTGGAGAGTGGATAGAGACCATGTGGGACTGTATGGAGGTCGCTGGCCAAACCATGTGCCTTACTGTCTTCATGATGGTCATGGTGATTGGAAATCTAGTGGTTCTGAACCTCTTCTTGGCCTTGCTTTTGAGTTCCTTCAGTTCTGACAATCTTGCTGCCACTGATGATGATAACGAAATGAATAATCTCCAGATTGCTGTGGGAAGGATGCAGAAAGGAATCGATTTTGTTAAAAGAAAAATACGTGAATTTATTCAGAAAGCCTTTGTTAGGAAGCAGAAAGCTTTAGATGAAATTAAACCGCTTGAAGATCTAAATAATAAAAAAGACAGCTGTATTTCCAACCATACCACCATAGAAATAGGCAAAGACCTCAATTATCTCAAAGACGGAAATGGAACTACTAGTGGCATAGGCAGCAGTGTAGAAAAATATGTCGTGGATGAAAGTGATTACATGTCATTTATAAACAACCCTAGCCTCACTGTGACAGTACCAATTGCTGTTGGAGAATCTGACTTTGAAAATTTAAATACTGAAGAATTCAGCAGCGAGTCAGATATGGAGGAAAGCAAAGAGAAGCTAAATGCAACTAGTTCATCTGAAGGCAGCACGGTTGATATTGGAGCTCCCGCCGAGGGAGAACAGCCTGAGGTTGAACCTGAGGAATCCCTTGAACCTGAAGCCTGCCTTAGTTACGAGACTGAGATCCTCACGGTCGAATACGGATTGCTGCCCATCGGGAAGATCGTTGAGAAAAGAATCGAATGTACGGTATACAGCGTAGACAACAATGGGAACATCTATACACAACCAGTAGCCCAGTGGCATGATCGAGGCGAACAGGAGGTATTCGAATACTGTCTGGAAGATGGATCTTTGATTCGGGCGACCAAGGATCATAAATTTATGACAGTGGACGGACAGATGCTGCCAATAGATGAAATATTTGAACGAGAACTGGACCTTATGCGGGTTGATAACCTTCCTAATTAA]GATATCGGATCCCGGGACTAGTACGCGTTAAGTCGACA")
 
-#lowercases
+# 2. cloningSitesToEx
+# lowercase variable names, as.vector
+# choose any number of them from bamh1,mlu1,nhe1,ecor1,nde1,hind3,xba1,spe1,ecor5
 cloningSitesToEx<-c(nhe1,mlu1) 
+
+# 3. gene
+# Files are named with 'gene' being part of the name.
 gene<-"SCN2A"
-codonRedunt<-1 # normally 1 codon foor each amino acid.
+
+# 4. codonRedunt
+# How many codons to choose, when available, for each amino acid mutant. 
+codonRedunt<-1 # normally 1 codon for each intended amino acid mutation.
+
+# 5. cdnPosToChange
+#specify the positions of codons to be mutated, as.vector.
 cdnPosToChange<-c(seq(820,1075,by=1)) #typically codon1 and codon-stop are not changed.
 
-# the fiiles generated by the designer will be saved in this folder.
-folder <- "~/Documents/SatMut-SCN2A/HalfProtein_SatMut/lib_design/"
+# 6. folder_to_write
+# make and then specify a folder where the code will write out files.
+folder_to_write <- "~/Desktop/YourGeneForSatMut/"
 
+######### End of set up: select the entire code and run it! ###############
+
+
+if(!dir.exists(path=folder_to_write)){
+  print (paste0("New folder need to make:", folder_to_write))
+}
+
+folder <- paste0(folder_to_write,"lib_design/")
 if(!dir.exists(path=folder)){
   print ("new folder need to make")
   dir.create(path=folder,mode="0777", showWarnings = TRUE)
-  if(!dir.exists(path=folder)){
+  if(dir.exists(path=folder)){
       print ("folder now exists")
   }
 } else {
   print ("folder exists")
 }
-#########################End of set up: select all and run it! ###############
 
 
 ########### FUNCTIONS and Constant values ############
@@ -69,8 +125,6 @@ codonTable_0<-codonTableFreq[1:4]
 
 codonFreq <- codonTableFreq %>%
   select("Vtcodon" = CODON, AA, Freq, Rank)
-
-detach(package:plyr, unload=TRUE)
 
 
 ###functions
@@ -140,9 +194,6 @@ sortCodonByFreq <- function (cdnList, freqRankedCdnTable ) {
   cdns_ranked <- as.vector(s_m_df$cdn)
   freq_ranked <- as.vector(s_m_df$Freq)
   aa_ranked <- as.vector(s_m_df$AA)
-  # print(cdns_ranked)
-  # print(freq_ranked)
-  # print(aa_ranked)
   return(cdns_ranked)
 }
 
@@ -155,17 +206,13 @@ sortCodonByFreq_weighted <- function (cdnList, freqRankedCdnTable ) {
   cdns_ranked <- rev(cdns_ranked0)
   print(m_df)
   print(cdns_ranked)
-  # print(cdns_ranked0)
-  # print(cdns_ranked)
-  # print(freq_ranked)
-  # print(aa_ranked)
   return(as.vector(cdns_ranked))
 }
 # 
 ############ end of functions ###############
 
-
-#templateSeq<-str_to_upper(templateSeqEGFRmidi)
+##Cleanup input data
+templateSeq<-gsub("\\t","",gsub("\\s","",gsub("\\n","",toupper(templateSeq))))
 templateSeq<-str_replace_all(templateSeq," ","")
 templateSeq<-str_replace_all(templateSeq,"\n","")
 date_str<-format(Sys.time(), "%Y%m%d")
@@ -181,12 +228,8 @@ orfTemplate<-str_c(lf6,orfTemplate0,rf6)
 orfLen<-nchar(orfTemplate0)/3
 nchar(orfTemplate0)/3
 
-
-
-
 print (str_c("ORF length in codon:", nchar(orfTemplate0)/3))
 print (str_c("ORF length in NT:", nchar(orfTemplate0)))
-
 
 ###check if the ORF template has sites of a few enzymes we are interested in
 Template_fromStart2Stop <- orfTemplate0
@@ -197,11 +240,6 @@ str_c("Does template have ",spe1,"? ",str_detect(Template_fromStart2Stop,str_sub
 str_c("Does template have ",mlu1,"? ",str_detect(Template_fromStart2Stop,str_sub(mlu1,1,6)),sep="")
 str_c("Does template have ",ecor5,"? ",str_detect(Template_fromStart2Stop,str_sub(ecor5,1,6)),sep="")
 str_c("Does template have ",nde1,"? ",str_detect(Template_fromStart2Stop,str_sub(nde1,1,6)),sep="")
-
-#sitesToEx_0<-c(nhe1,mlu1,hind3,ecor5,ecor5) ##PDE3A
-#EcoRV, HindIII, NheI, BamHI, EcoRI, NdeI, XbaI for tPPM1D
-# 
-# sitesToEx_0<-c(nhe1,bamh1,ecor5, ecor1, hind3, nde1, xba1) ##tPPM1D
 
 
 sitesToEx_0=c(cloningSitesToEx,cloningSitesToEx,cloningSitesToEx,cloningSitesToEx,cloningSitesToEx)[1:5]
@@ -239,25 +277,14 @@ if(identical(qu,"Y")){
   returnValue()
   print ("set template to null to stop the code")
 }
-"I passed returnValue block"
-#
 
-```
-
-Note that we can comment out code line 402 "break" to allow more than one B codons.
-
-```{r design}
 
 sitesToEx<-str_sub(sitesToEx_0,1,6)
 
-
-library("plyr")
 x<-orfTemplate
-templateIn3s<-laply(seq(1,nchar(x),3), function(i) substr(x, i, i+2))
+templateIn3s<-plyr::laply(seq(1,nchar(x),3), function(i) substr(x, i, i+2))
 templateIn3s
 length(templateIn3s)
-
-
 
 AA1<-c('M','W')
 AA2<-c('C','D','E','F','H','K','N','Q','Y')
@@ -298,38 +325,27 @@ nt3<-c()
 bb<-c()
 # 
 nativeZ<-templateIn3s[orfLen+2] ###end+4 is the last and stop codon
-#AAAGCCAGACCAGTAG,ACGCGTTAAGTCGACA"
+
 
 
 for (i in seq(1,orfLen,by=1)){
   vtaa1x<-c(AA1,AA2,AA3,AA4,AA6)
   bbCount<-0
-#  for (i in 1:orfLen){
-#  i<-1141
-#  print(str_c(i,i,i, sep = '-------------'))
   wt<-templateIn3s[i+2]
   wtAA<-codonTable[codonTable$CODON==wt,]$AA
    if(i %in% cdnPosToChange){
       hamming<-fromCodonTo123nt(wt)
-  # ones<-sample(as.vector(hamming$delta1nt))
-  # twos<-sample(as.vector(hamming$delta2nt))
-  # threes<-sample(as.vector(hamming$delta3nt))
-    ones_0<-as.vector(hamming$delta1nt)
+      ones_0<-as.vector(hamming$delta1nt)
     threes_0<-c(as.vector(hamming$delta2nt),as.vector(hamming$delta3nt))
-    # ones<-sortCodonByFreq("cdnList"=ones_0, "freqRankedCdnTable"= codonFreq)
-    # threes<-sortCodonByFreq("cdnList"=threes_0, "freqRankedCdnTable"= codonFreq)
     ones<-sortCodonByFreq_weighted("cdnList"=ones_0, "freqRankedCdnTable"= codonFreq)
     threes<-sortCodonByFreq_weighted("cdnList"=threes_0, "freqRankedCdnTable"= codonFreq)
     
     sz1<-length(ones)
-    # sz2<-length(twos)
     sz3<-length(threes)
     print (str_c("codon = ",i, sep=''))
     print (str_c("TemplateCodon = ",wt, sep=''))
     print (str_c("sz1=",sz1,sep=''))
     print (ones)
-    # print (str_c("sz2=",sz2,sep=''))
-    # print (twos)
     print (str_c("sz3=",sz3,sep=''))
     print (threes)
     vtcdns<-c()
@@ -359,7 +375,6 @@ for (i in seq(1,orfLen,by=1)){
         vtcdns<-c(vtcdns,bbs[s])
         vtcdnsAA<-c(vtcdnsAA,str_c( bbs[s],"B",stringdist(wt,bbs[s],method='hamming'),sep="_"))
         threes<-rmEl(threes,bbs[s])
-      # twos<-rmEl(twos,bbs[s])
         bb<-c(bb,str_c( i,bbs[s],"B",stringdist(wt,bbs[s],method='hamming'),sep="_"))
         bbCount<-bbCount+1
         if(bbCount>=2){
@@ -415,7 +430,6 @@ for (i in seq(1,orfLen,by=1)){
           print (str_c("Fulfilled by ",hm,"nt:",threes[k],"-", fqaa,":Freq=",fq,"==========>",i,sep=''))
           vtaas2<-rmEl(vtaas2,aa)
           threes<-rmEl(threes,threes[k])
-          # print(vtaas2)
           if(!(aa %in% vtaas2)){
             break;
           }
@@ -560,7 +574,7 @@ tb_dat[is.na(tb_dat)]<-0
 tb_codon_aa<-tb_codon_aa[order(as.numeric(tb_codon_aa$POS)),]
 
 tb_aa_codon_review<-DF2 %>%
-  # filter(delta_nt != 0) %>%
+  # dplyr::filter(delta_nt != 0) %>%
   mutate(count = ifelse((Vtaa == 'B'),str_c("B", count, sep = "_"), count)) %>%
   mutate(count = ifelse(count == '0nt', 'wt', count))%>%
   mutate(VtcodonAA=str_c(VtaaNoB,Vtcodon,sep = '_'))%>%
@@ -577,7 +591,7 @@ TwistCodonSort<-c('A_GCT',	'A_GCA',	'A_GCC',	'A_GCG',	'C_TGC',	'C_TGT',	'D_GAT',
 
 
 tb_aa_codon_TwistForm_0<-DF2 %>%
-  #filter(delta_nt != 0) %>%
+  #dplyr::filter(delta_nt != 0) %>%
   mutate(count = ifelse(delta_nt==0, '', Vtcodon)) %>%
   mutate(VtcodonAA=str_c(VtaaNoB,Vtcodon,sep = '_')) %>%
   select (-Vtcodon) %>%
@@ -598,7 +612,7 @@ tb_aa_codon_TwistForm_t <- t(tb_aa_codon_TwistForm)
 
 
 tb_aa_codon<-DF2 %>%
- # filter(delta_nt != 0) %>%
+ # dplyr::filter(delta_nt != 0) %>%
   mutate(VtcodonAA=str_c(VtaaNoB,Vtcodon,sep = '_'))%>%
   select (-Vtcodon) %>%
   group_by(POS,Wtcodon,Wtaa)%>%
@@ -645,10 +659,10 @@ codons64<-names(intendedCdn)[-c(1:3)]
 
 library(reshape2)
 m_tmp50 <-melt(intendedCdn, id=c("POS","Wtcodon","Wtaa"), variable.name="Vtcodon", value.name = "Ct") %>%
-filter(Ct !='' & Ct !='0nt')
+  dplyr::filter(Ct !='' & Ct !='0nt')
 
 tmp50<-m_tmp50 %>%
-  filter(Ct!='') %>%
+  dplyr::filter(Ct!='') %>%
   mutate(delta_nt=stringdist(Wtcodon,Vtcodon, method='hamming')) %>%
   arrange(as.numeric(POS))
 
@@ -676,15 +690,15 @@ failed
 
 ###logFile
 flname<-paste(folder,"DesignBy_SatMut_1_9_",gene,"_LogFile_",enzs,date_str,".txt", sep='')
-
-
-  cat("Variants to miss out due to restriction sites fails:", file=flname, sep="\n",append=TRUE)
-  cat(failed, file=flname, sep="\n", append=TRUE)
-  
+cat("\n=== LOG FILE ===", file=flname, sep="\n", append=TRUE)
+cat("Variants to miss out due to restriction sites fails:", file=flname, sep="\n",append=TRUE)
+cat(failed, file=flname, sep="\n", append=TRUE)
 cat("Wt silent variants:", file=flname, sep="\n",append=TRUE)
 cat(length(bb), file=flname, sep="\n", append=TRUE)
 cat("total variants:", file=flname, sep="\n", append=TRUE)
 cat(as.character(sm1), file=flname, sep=" \n", append=TRUE)
+cat("total codon positions mutated:", file=flname, sep="\n", append=TRUE)
+cat(length(cdnPosToChange), file=flname, sep="\n", append=TRUE)
 cat("3nt-delta:", file=flname, sep="\n", append=TRUE)
 cat(as.character(sm2), file=flname, sep="\n", append=TRUE)
 cat("2nt-delta:", file=flname, sep="\n", append=TRUE)
@@ -694,3 +708,4 @@ cat(as.character(sm4), file=flname, sep="\n", append=TRUE)
 cat("1nt-delta fraction:", file=flname, sep="\n", append=TRUE)
 cat(as.character(sm5), file=flname, sep="\n", append=TRUE)
 
+## the end
