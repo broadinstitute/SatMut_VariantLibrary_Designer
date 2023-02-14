@@ -1,5 +1,5 @@
 # Designer:
-# https://github.com/broadinstitute/SatMut_VariantLibrary_Designer/releases/tag/v1.9 
+# https://github.com/broadinstitute/SatMut_VariantLibrary_Designer/releases/tag/v1.10 
 
 ##some common enzymes
 bamh1<-'GGATCC-BamHI' 
