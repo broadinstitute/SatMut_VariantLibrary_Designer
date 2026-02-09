@@ -351,24 +351,19 @@ for (i in seq(1,orfLen,by=1)){
     vtcdns<-c()
     vtcdnsAA<-c()
     vtaa1x<-c(vtaa1x)
-    lf<-str_c(templateIn3s[i],templateIn3s[i+1],sep='')
-    rf<-str_c(templateIn3s[i+3],templateIn3s[i+4],sep='')
+    lf<-str_c(templateIn3s[1:(i+1)],collapse = '')
+    rf<-str_c(templateIn3s[(i+3):orfLen],collapse ='')
     
     wtAA<-codonTable[codonTable$CODON==wt,]$AA
     bbs<-getBB(wtAA,codonTable)
 
     for(s in 1:length(bbs)){
       if(stringdist(wt,bbs[s],method='hamming')==2 | stringdist(wt,bbs[s],method='hamming')==3){
-        if(str_detect(str_c(lf,bbs[s],sep=''),sitesToEx[1])|
-         str_detect(str_c(lf,bbs[s],sep=''),sitesToEx[2])|
-         str_detect(str_c(lf,bbs[s],sep=''),sitesToEx[3])|
-         str_detect(str_c(lf,bbs[s],sep=''),sitesToEx[4])|
-         str_detect(str_c(lf,bbs[s],sep=''),sitesToEx[5])|
-         str_detect(str_c(bbs[s],rf,sep=''),sitesToEx[1])|
-         str_detect(str_c(bbs[s],rf,sep=''),sitesToEx[2])|
-         str_detect(str_c(bbs[s],rf,sep=''),sitesToEx[3])|
-         str_detect(str_c(bbs[s],rf,sep=''),sitesToEx[4])|
-         str_detect(str_c(bbs[s],rf,sep=''),sitesToEx[5])){
+        if(str_detect(str_c(lf,bbs[s],rf,sep=''),sitesToEx[1])|
+         str_detect(str_c(lf,bbs[s],rf,sep=''),sitesToEx[2])|
+         str_detect(str_c(lf,bbs[s],rf,sep=''),sitesToEx[3])|
+         str_detect(str_c(lf,bbs[s],rf,sep=''),sitesToEx[4])|
+         str_detect(str_c(lf,bbs[s],rf,sep=''),sitesToEx[5])){
           failedRes<-c(failedRes,str_c(i,bbs[s],wtAA,stringdist(wt,bbs[s],method='hamming'),sep="_"))
         next
         }
@@ -399,16 +394,11 @@ for (i in seq(1,orfLen,by=1)){
             threes<-rmEl(threes,threes[k])
             next
             }
-          if(str_detect(str_c(lf,threes[k],sep=''),sitesToEx[1])|
-             str_detect(str_c(lf,threes[k],sep=''),sitesToEx[2])|
-             str_detect(str_c(lf,threes[k],sep=''),sitesToEx[3])|
-             str_detect(str_c(lf,threes[k],sep=''),sitesToEx[4])|
-             str_detect(str_c(lf,threes[k],sep=''),sitesToEx[5])|
-             str_detect(str_c(threes[k],rf,sep=''),sitesToEx[1])|
-             str_detect(str_c(threes[k],rf,sep=''),sitesToEx[2])|
-             str_detect(str_c(threes[k],rf,sep=''),sitesToEx[3])|
-             str_detect(str_c(threes[k],rf,sep=''),sitesToEx[4])|
-             str_detect(str_c(threes[k],rf,sep=''),sitesToEx[5])){
+          if(str_detect(str_c(lf,threes[k],rf,sep=''),sitesToEx[1])|
+             str_detect(str_c(lf,threes[k],rf,sep=''),sitesToEx[2])|
+             str_detect(str_c(lf,threes[k],rf,sep=''),sitesToEx[3])|
+             str_detect(str_c(lf,threes[k],rf,sep=''),sitesToEx[4])|
+             str_detect(str_c(lf,threes[k],rf,sep=''),sitesToEx[5])){
             print ("threes failed site restriction")
             print(str_c(lf,threes[k],sep=''))
             print (str_c(threes[k],rf,sep=''))
@@ -448,24 +438,19 @@ for (i in seq(1,orfLen,by=1)){
                ones<-rmEl(ones,ones[n])
                next
              }
-             if(str_detect(str_c(lf,ones[n],sep=''),sitesToEx[1])|
-                str_detect(str_c(lf,ones[n],sep=''),sitesToEx[2])|
-                str_detect(str_c(lf,ones[n],sep=''),sitesToEx[3])|
-                str_detect(str_c(lf,ones[n],sep=''),sitesToEx[4])|
-                str_detect(str_c(lf,ones[n],sep=''),sitesToEx[5])|
-                str_detect(str_c(ones[n],rf,sep=''),sitesToEx[1])|
-                str_detect(str_c(ones[n],rf,sep=''),sitesToEx[2])|
-                str_detect(str_c(ones[n],rf,sep=''),sitesToEx[3])|
-                str_detect(str_c(ones[n],rf,sep=''),sitesToEx[4])|
-                str_detect(str_c(ones[n],rf,sep=''),sitesToEx[5])){
-               print ("ones failed site restriction")
-               print(str_c(lf,ones[n],sep=''))
-               print (str_c(ones[n],rf,sep=''))
-               print (ones[n])
-               failedRes<-c(failedRes,str_c(i,ones[n],aa,"1",sep="_"))
-               ones<-rmEl(ones,ones[n])
-               next
-             }
+             if(str_detect(str_c(lf,ones[n],rf,sep=''),sitesToEx[1])|
+                str_detect(str_c(lf,ones[n],rf,sep=''),sitesToEx[2])|
+                str_detect(str_c(lf,ones[n],rf,sep=''),sitesToEx[3])|
+                str_detect(str_c(lf,ones[n],rf,sep=''),sitesToEx[4])|
+                str_detect(str_c(lf,ones[n],rf,sep=''),sitesToEx[5])){
+                   print ("ones failed site restriction")
+                   print(str_c(lf,ones[n],sep=''))
+                   print (str_c(ones[n],rf,sep=''))
+                   print (ones[n])
+                   failedRes<-c(failedRes,str_c(i,ones[n],aa,"1",sep="_"))
+                   ones<-rmEl(ones,ones[n])
+                   next
+                 }
              vtcdns<-c(vtcdns,ones[n])       
              vtcdnsAA<-c(vtcdnsAA,str_c(ones[n],aa,"1",sep="_"))
              vtUsedOnceOrMore<-c(vtUsedOnceOrMore,aa) 
